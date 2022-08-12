@@ -34,7 +34,7 @@ class Product extends Component {
 Product.propTypes = {
   name: propTypes.string.isRequired,
   img: propTypes.string.isRequired,
-  price: propTypes.string.isRequired,
+  price: propTypes.number.isRequired,
   id: propTypes.string.isRequired,
 };
 
