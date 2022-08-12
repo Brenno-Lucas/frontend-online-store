@@ -2,55 +2,63 @@ import React, { Component } from 'react';
 
 export default class Cart extends Component {
   state = {
-    modifyQuantity: 0,
     cart: [],
   }
 
   componentDidMount() {
-    this.openPage();
+    this.setCart();
   }
 
-  openPage = () => {
-    const cart2 = JSON.parse(localStorage.getItem('cart'));
+  setCart = () => {
+    const stateCart = JSON.parse(localStorage.getItem('cart'));
     this.setState({
-      cart: cart2,
+      cart: stateCart,
     });
-    console.log(cart2);
   };
 
   removeCartItem = (target) => target.parentNode.parentNode.remove();
 
-  addProduct = (actual) => {
-    this.setState(({ modifyQuantity: prevQuantity }) => (
-      {
-        modifyQuantity: prevQuantity + 1,
-      }
-    ));
-    console.log(actual);
+  addProduct = (eachProduct) => {
+    const { cart } = this.state;
+    this.setState({
+      cart: [...cart, eachProduct],
+    }, () => {
+      eachProduct.quantity += 1;
+      const set = new Set(cart);
+      const stateCart = [...set];
+      this.setState({
+        cart: stateCart,
+      });
+    });
   }
 
-  subtractProduct = () => {
-    const { modifyQuantity } = this.state;
-    if (modifyQuantity > 0) {
-      this.setState(({ modifyQuantity: prevQuantity }) => (
-        {
-          modifyQuantity: prevQuantity - 1,
-        }
-      ));
-    }
-    console.log('subtração');
+  subtractProduct = (eachProduct) => {
+    const { cart } = this.state;
+    this.setState({
+      cart: [...cart, eachProduct],
+    }, () => {
+      if (eachProduct.quantity !== 1) {
+        eachProduct.quantity -= 1;
+      }
+      const set = new Set(cart);
+      const stateCart = [...set];
+      this.setState({
+        cart: stateCart,
+      });
+    });
   }
 
   render() {
-    const { modifyQuantity, cart } = this.state;
+    const { cart } = this.state;
     const { addProduct, subtractProduct, removeCartItem } = this;
+    const set = new Set(cart);
+    const stateCart = [...set];
     function buildCart() {
-      if (cart && cart.length > 0) {
-        return cart.map((actual) => {
-          const { id, title, thumbnail } = actual;
-          let { quantity, price } = actual;
-          const quantidadeAtual = quantity;
-          quantity = (quantidadeAtual + modifyQuantity);
+      if (stateCart && stateCart.length > 0) {
+        return stateCart.reverse().map((eachProduct) => {
+          const { id, title, thumbnail } = eachProduct;
+          let { quantity, price } = eachProduct;
+          quantity = eachProduct.quantity;
           const priceNovo = price;
           price = (priceNovo * quantity);
           return (
@@ -66,7 +74,7 @@ export default class Cart extends Component {
                 <button
                   type="button"
                   data-testid="product-decrease-quantity"
-                  onClick={ () => subtractProduct(actual) }
+                  onClick={ () => subtractProduct(eachProduct) }
                 >
                   -
                 </button>
@@ -74,9 +82,7 @@ export default class Cart extends Component {
                 <button
                   data-testid="product-increase-quantity"
                   type="button"
-                  onClick={ () => addProduct(actual) }
-                  /* onClick={ cart
-                    .some((check) => check.trackId === trackId) } */
+                  onClick={ () => addProduct(eachProduct) }
                 >
                   +
                 </button>
@@ -107,69 +113,4 @@ export default class Cart extends Component {
       </div>
     );
   }
-
-  /* render() {
-    const { cart, modifyQuantity } = this.state;
-    const { addProduct, subtractProduct, removeCartItem } = this;
-    const storageCart = JSON.parse(localStorage.getItem('cart'));
-    return (
-      <div>
-        {storageCart.length === 0
-        && (<p data-testid="shopping-cart-empty-message">Seu carrinho está vazio</p>)}
-        { cart.map((actual) => {
-          console.log(cart);
-          const { id, title, thumbnail } = actual;
-          let { quantity, price } = actual;
-          console.log(price);
-          const quantidadeAtual = quantity;
-          quantity = (quantidadeAtual + modifyQuantity);
-          const priceNovo = price;
-          price = (priceNovo * quantity);
-
-          return (
-            <div key={ id }>
-              <h3 data-testid="shopping-cart-product-name">{title}</h3>
-              <img src={ thumbnail } alt={ id } />
-              <p>{`Preço: R$ ${price}`}</p>
-
-              <button
-                type="button"
-                data-testid="product-decrease-quantity"
-                onClick={ ({ target }) => subtractProduct(target) }
-              >
-                -
-              </button>
-
-              <p id="quant" data-testid="shopping-cart-product-quantity">
-                Quantidade produto
-                {quantity}
-              </p>
-              <p>
-                {' '}
-                Modify Quantity
-                {' '}
-                { modifyQuantity }
-              </p>
-              <button
-                data-testid="product-increase-quantity"
-                type="button"
-                onClick={ ({ target }) => addProduct(target) }
-              >
-                +
-              </button>
-
-              <br />
-              <button
-                type="button"
-                data-testid="remove-product"
-                onClick={ ({ target }) => removeCartItem(target) }
-              >
-                x
-              </button>
-            </div>
-          );
-        })}
-      </div>
-    );
-  } */
 }
